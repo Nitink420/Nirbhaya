@@ -1,0 +1,12 @@
+<resources>
+
+    <!-- Base application theme. Dark to match the JS UI (#0D0D0F) and avoid a white flash on launch. -->
+    <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:editTextBackground">@drawable/rn_edit_text_material</item>
+        <item name="android:windowBackground">@color/nirbhaya_bg</item>
+        <item name="android:statusBarColor">@color/nirbhaya_bg</item>
+        <item name="android:navigationBarColor">@color/nirbhaya_bg</item>
+        <item name="colorAccent">@color/nirbhaya_sos</item>
+    </style>
+
+</resources>
