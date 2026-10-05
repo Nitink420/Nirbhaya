@@ -10,6 +10,7 @@
     "test": "jest",
     "typecheck": "tsc --noEmit",
     "sounds": "node scripts/generate-sounds.js",
+    "web": "node scripts/serve-web.js",
     "build:apk": "cd android && gradlew assembleDebug"
   },
   "dependencies": {

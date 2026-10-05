@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Nirbhaya (निर्भaya) — Web Simulator</title>
+  <meta name="description" content="Offline personal safety companion for women — Web Test Simulator for Nirbhaya app.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Background Glow Accents -->
+  <div class="ambient-glow ambient-1"></div>
+  <div class="ambient-glow ambient-2"></div>
+
+  <div class="simulator-wrapper">
+    <!-- Header Controls -->
+    <aside class="desktop-panel">
+      <div class="brand-badge">
+        <img src="assets/logo.png" alt="Nirbhaya Logo" class="brand-icon">
+        <div>
+          <h2>Nirbhaya Simulator</h2>
+          <span class="version-tag">React Native Bare Android Web Simulator</span>
+        </div>
+      </div>
+      
+      <div class="panel-section">
+        <h3>⚡ Quick Simulator Actions</h3>
+        <p class="section-desc">Instantly test edge-cases without needing physical GPS movement:</p>
+        <div class="quick-btn-grid">
+          <button id="sim-trigger-deviation" class="sim-btn sim-btn-warn">
+            <span class="icon">🏃‍♀️</span>
+            <span>Walk 350m (Trigger Deviation)</span>
+          </button>
+          <button id="sim-trigger-fakecall" class="sim-btn sim-btn-call">
+            <span class="icon">📞</span>
+            <span>Launch Fake Call ("Maa")</span>
+          </button>
+          <button id="sim-trigger-sos" class="sim-btn sim-btn-sos">
+            <span class="icon">🚨</span>
+            <span>Force Direct SOS</span>
+          </button>
+          <button id="sim-reset-walk" class="sim-btn sim-btn-reset">
+            <span class="icon">🔄</span>
+            <span>Reset to Home / Start</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <h3>📱 Outgoing Cellular SMS Dispatch Log</h3>
+        <p class="section-desc">Simulates what the native Kotlin <code>SmsModule</code> dispatches to the cellular radio:</p>
+        <div id="sms-log-container" class="sms-log-box">
+          <div class="sms-log-empty">No SOS sent yet. Trigger SOS in Walk Mode to see simulated offline SMS dispatch.</div>
+        </div>
+      </div>
+
+      <div class="panel-footer">
+        <span class="dot live-dot"></span> Web Audio API Siren & Ringtone Enabled
+      </div>
+    </aside>
+
+    <!-- Mobile Device Mockup -->
+    <div class="phone-frame">
+      <div class="phone-speaker"></div>
+      <div class="phone-camera"></div>
+      
+      <div class="phone-screen" id="phone-screen">
+        
+        <!-- Status Bar -->
+        <div class="status-bar">
+          <span id="status-clock">09:41</span>
+          <div class="status-icons">
+            <svg width="15" height="11" viewBox="0 0 15 11" fill="currentColor">
+              <path d="M1 9.5h2v-2H1v2zm3 0h2v-4H4v4zm3 0h2v-6H7v6zm3 0h2V1h-2v8.5zm3 0h2v-10h-2v10z"/>
+            </svg>
+            <span class="status-carrier">Jio 4G</span>
+            <div class="battery-icon"><div class="battery-level"></div></div>
+          </div>
+        </div>
+
+        <!-- ================= SCREEN 1: SPLASH ================= -->
+        <section id="screen-splash" class="app-screen screen-active">
+          <div class="splash-halo"></div>
+          <div class="splash-center">
+            <div class="logo-wrapper">
+              <div class="logo-glow"></div>
+              <img src="assets/logo.png" alt="Nirbhaya Shield Logo" class="app-logo">
+            </div>
+            <h1 class="splash-title">Nirbhaya</h1>
+            <p class="splash-tagline">Bina dare, har raah pe</p>
+          </div>
+          <div class="splash-footer">OFFLINE · PRIVATE · ALWAYS READY</div>
+        </section>
+
+        <!-- ================= SCREEN 2: HOME ================= -->
+        <section id="screen-home" class="app-screen">
+          <header class="home-header">
+            <div class="home-brand">
+              <img src="assets/logo.png" alt="Logo" class="mini-logo">
+              <div>
+                <h1 class="brand-title">Nirbhaya</h1>
+                <p class="brand-tag">Bina dare, har raah pe</p>
+              </div>
+            </div>
+            <div id="demo-indicator-pill" class="status-pill status-ready">
+              <span class="pill-dot"></span>
+              <span class="pill-label">GPS LIVE</span>
+            </div>
+          </header>
+
+          <div class="home-scroll-area">
+            <div class="home-hero">
+              <h2 class="hero-heading">Walking alone?</h2>
+              <p class="hero-subtext">
+                Start Walk Mode. We'll watch your route, and one long-press sends your live location to your people — even without internet.
+              </p>
+            </div>
+
+            <!-- Start Walk Mode CTA -->
+            <div class="start-walk-wrapper">
+              <div class="start-glow-bg"></div>
+              <button id="btn-start-walk" class="btn-hero-sos">
+                <span class="btn-hero-icon">🚶‍♀️</span>
+                <div class="btn-hero-text">
+                  <span class="btn-hero-title">START WALK MODE</span>
+                  <span class="btn-hero-subtitle" id="walk-mode-sublabel">Live GPS route tracking</span>
+                </div>
+              </button>
+            </div>
+
+            <!-- Emergency Contacts Card -->
+            <div class="card card-actionable" id="btn-open-contacts">
+              <div class="card-row">
+                <div class="card-icon-bubble bubble-pink">👥</div>
+                <div class="card-info">
+                  <h3 class="card-title">Set Emergency Contacts</h3>
+                  <p class="card-subtitle" id="contacts-count-text">3 contacts saved</p>
+                </div>
+                <span class="chevron-icon">›</span>
+              </div>
+              <div class="contact-chips" id="home-contact-chips">
+                <!-- Injected via JS -->
+              </div>
+            </div>
+
+            <!-- Demo Mode Toggle Card -->
+            <div class="card">
+              <div class="card-row">
+                <div class="card-icon-bubble bubble-purple">🧪</div>
+                <div class="card-info">
+                  <h3 class="card-title">Demo Mode</h3>
+                  <p class="card-subtitle">
+                    Uses fixed location (New Delhi: 28.6139, 77.2090) and simulates a walk.
+                  </p>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="toggle-demo-mode">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- How It Works Guide -->
+            <div class="guide-section">
+              <span class="section-badge">HOW IT WORKS</span>
+              <div class="guide-item">
+                <div class="guide-bar bar-safe"></div>
+                <div>
+                  <h4 class="guide-title">I'm Safe</h4>
+                  <p class="guide-desc">Ends the walk and takes you back home.</p>
+                </div>
+              </div>
+              <div class="guide-item">
+                <div class="guide-bar bar-warn"></div>
+                <div>
+                  <h4 class="guide-title">Feeling Uneasy</h4>
+                  <p class="guide-desc">Rings a fake call from "Maa" to help you exit smoothly.</p>
+                </div>
+              </div>
+              <div class="guide-item">
+                <div class="guide-bar bar-sos"></div>
+                <div>
+                  <h4 class="guide-title">I'm Unsafe / SOS</h4>
+                  <p class="guide-desc">Texts your live location to all contacts + loud siren.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= SCREEN 3: WALK MODE ================= -->
+        <section id="screen-walk" class="app-screen">
+          <header class="walk-header">
+            <button class="nav-back-btn" id="btn-walk-back" aria-label="End walk">‹</button>
+            <div class="walk-title-box">
+              <h2 class="walk-title">Walk Mode</h2>
+              <span class="walk-duration" id="walk-elapsed-time">Tracking 00:00</span>
+            </div>
+            <div class="status-pill status-ready" id="walk-status-pill">
+              <span class="live-pulse-dot"></span>
+              <span class="pill-label" id="walk-pill-label">LIVE</span>
+            </div>
+          </header>
+
+          <div class="walk-scroll-area">
+            <!-- 300m Deviation Alert Banner -->
+            <div id="deviation-alert" class="deviation-banner hidden">
+              <span class="alert-icon">⚠️</span>
+              <div>
+                <h4 class="alert-title" id="deviation-title">You're 320 m from your start</h4>
+                <p class="alert-sub">More than 300 m off. Feeling uneasy? Use the fake call or SOS.</p>
+              </div>
+            </div>
+
+            <!-- Distance & Coords Card -->
+            <div class="card stats-card">
+              <span class="stat-caption">DISTANCE FROM START</span>
+              <div class="distance-row">
+                <span class="distance-number" id="walk-distance-display">0 m</span>
+                <span class="distance-max">/ 300 m</span>
+              </div>
+              
+              <!-- Progress track -->
+              <div class="stat-track">
+                <div class="stat-track-fill" id="walk-track-fill" style="width: 2%;"></div>
+              </div>
+
+              <!-- Live & Start Coords Grid -->
+              <div class="coords-grid">
+                <div class="coord-box">
+                  <span class="coord-tag coord-tag-live">LIVE POSITION</span>
+                  <span class="coord-val" id="live-lat">28.613900</span>
+                  <span class="coord-val" id="live-lng">77.209000</span>
+                </div>
+                <div class="coord-divider"></div>
+                <div class="coord-box">
+                  <span class="coord-tag coord-tag-start">START POINT</span>
+                  <span class="coord-val" id="start-lat">28.613900</span>
+                  <span class="coord-val" id="start-lng">77.209000</span>
+                </div>
+              </div>
+              <div class="gps-accuracy-note" id="gps-accuracy-text">GPS accuracy ±5 m</div>
+            </div>
+
+            <!-- 2-Second Hold SOS Button -->
+            <div class="sos-interactive-container">
+              <div class="sos-outer-ring ring-1"></div>
+              <div class="sos-outer-ring ring-2"></div>
+              
+              <div class="sos-hold-btn" id="sos-hold-btn" role="button" tabindex="0">
+                <div class="sos-progress-fill" id="sos-progress-fill"></div>
+                <span class="sos-btn-text">SOS</span>
+                <span class="sos-btn-caption" id="sos-hold-caption">HOLD 2 SEC</span>
+              </div>
+              <p class="sos-disclaimer" id="sos-recipients-note">Alerts Maa, Papa, Priya</p>
+            </div>
+
+            <!-- 3 Main Action Buttons -->
+            <div class="walk-actions">
+              <button class="action-btn btn-safe" id="btn-im-safe">
+                <span class="act-icon">✓</span>
+                <div class="act-text">
+                  <span class="act-title">I'M SAFE</span>
+                  <span class="act-sub">End walk & go home</span>
+                </div>
+              </button>
+
+              <button class="action-btn btn-warn" id="btn-feeling-uneasy">
+                <span class="act-icon">📞</span>
+                <div class="act-text">
+                  <span class="act-title">FEELING UNEASY</span>
+                  <span class="act-sub">Get a fake call from Maa</span>
+                </div>
+              </button>
+
+              <button class="action-btn btn-sos" id="btn-im-unsafe">
+                <span class="act-icon">🚨</span>
+                <div class="act-text">
+                  <span class="act-title">I'M UNSAFE</span>
+                  <span class="act-sub">Send SOS in 3s countdown</span>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <!-- 3-Second Countdown Modal Overlay -->
+          <div id="countdown-modal" class="modal-overlay hidden">
+            <div class="countdown-card">
+              <span class="countdown-badge">SENDING SOS IN</span>
+              <div class="countdown-digit" id="countdown-number">3</div>
+              <p class="countdown-note">Emergency SMS with your location is about to be sent.</p>
+              <div class="modal-actions-row">
+                <button class="action-btn btn-sos flex-1" id="btn-countdown-now">SEND NOW</button>
+                <button class="action-btn btn-outline flex-1" id="btn-countdown-cancel">CANCEL</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Fullscreen SOS Emergency Dispatch Overlay -->
+          <div id="sos-overlay" class="sos-fullscreen-overlay hidden">
+            <div class="sos-beacon-anim">
+              <div class="beacon-wave"></div>
+              <div class="beacon-circle">SOS</div>
+            </div>
+            
+            <h2 class="sos-overlay-title" id="sos-overlay-title">Alerting your contacts…</h2>
+            <p class="sos-overlay-sub" id="sos-overlay-sub">Stay calm. Sending emergency SMS & siren on.</p>
+
+            <div class="sos-loc-card">
+              <span class="loc-card-tag">📍 LOCATION TRANSMITTED</span>
+              <div class="loc-card-coords" id="sos-dispatched-coords">28.613900, 77.209000</div>
+              <a href="#" target="_blank" class="loc-card-link" id="sos-maps-link">https://maps.google.com/?q=28.613900,77.209000</a>
+            </div>
+
+            <!-- Per-Contact Status Rows -->
+            <div class="sos-contact-list" id="sos-contact-status-list">
+              <!-- Dynamically populated -->
+            </div>
+
+            <div class="sos-overlay-actions">
+              <button class="action-btn btn-surface" id="btn-toggle-siren">
+                <span id="siren-btn-icon">🔇</span>
+                <span id="siren-btn-text">STOP SIREN</span>
+              </button>
+              <button class="action-btn btn-safe" id="btn-sos-im-safe">
+                <span class="act-icon">✓</span>
+                <div class="act-text">
+                  <span class="act-title">I'M SAFE NOW</span>
+                  <span class="act-sub">End SOS & return home</span>
+                </div>
+              </button>
+              <button class="btn-ghost" id="btn-sos-dismiss">Back to Walk Mode</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= SCREEN 4: FAKE CALL ================= -->
+        <section id="screen-call" class="app-screen">
+          <div class="call-glow-top"></div>
+          <div class="call-glow-bottom"></div>
+
+          <!-- Top Caller Info -->
+          <div class="caller-profile">
+            <span class="call-carrier-tag" id="call-header-status">Mobile · Jio 4G</span>
+            
+            <div class="caller-avatar-wrapper">
+              <div class="avatar-ring-anim ring-call-1" id="call-ring-1"></div>
+              <div class="avatar-ring-anim ring-call-2" id="call-ring-2"></div>
+              <div class="caller-avatar-circle">M</div>
+            </div>
+
+            <h2 class="caller-name">Maa ❤️</h2>
+            <span class="caller-phone">+91 98765 43210</span>
+            <span class="call-state-label" id="call-status-label">Incoming call…</span>
+          </div>
+
+          <!-- Ringing Bottom Controls -->
+          <div id="call-ringing-controls" class="call-ringing-box">
+            <div class="call-quick-options">
+              <div class="quick-opt">
+                <span class="opt-icon">⏰</span>
+                <span class="opt-lbl">Remind me</span>
+              </div>
+              <div class="quick-opt">
+                <span class="opt-icon">💬</span>
+                <span class="opt-lbl">Message</span>
+              </div>
+            </div>
+
+            <div class="call-action-row">
+              <div class="call-col">
+                <button class="call-round-btn btn-decline" id="btn-decline-call" aria-label="Decline Call">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="white">
+                    <path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08a.996.996 0 0 1 0-1.41C2.5 9.47 6.94 8 12 8s9.5 1.47 11.71 3.67c.39.39.39 1.02 0 1.41l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.11-.7-.28-.79-.74-1.69-1.36-2.67-1.85-.33-.16-.56-.5-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z"/>
+                  </svg>
+                </button>
+                <span class="call-btn-label">Decline</span>
+              </div>
+
+              <div class="call-col">
+                <button class="call-round-btn btn-accept" id="btn-accept-call" aria-label="Accept Call">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="white">
+                    <path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 0 0-1.01.24l-1.57 1.97c-2.83-1.44-5.15-3.75-6.59-6.59l1.97-1.57c.28-.28.37-.68.25-1.02A11.36 11.36 0 0 1 8.56 4c0-.55-.45-1-1-1H4.01c-.55 0-1 .45-1 1 0 9.39 7.61 17 17 17 .55 0 1-.45 1-1v-3.49c0-.55-.45-1-1-1.13z"/>
+                  </svg>
+                </button>
+                <span class="call-btn-label">Accept</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- In-Call Active Controls (Mute, Speaker, Keypad, End) -->
+          <div id="call-active-controls" class="call-active-box hidden">
+            <div class="active-grid">
+              <button class="active-ctrl-btn" id="ctrl-mute">
+                <span class="ctrl-icon">🎙️</span>
+                <span class="ctrl-label">Mute</span>
+              </button>
+              <button class="active-ctrl-btn" id="ctrl-keypad">
+                <span class="ctrl-icon">⌨️</span>
+                <span class="ctrl-label">Keypad</span>
+              </button>
+              <button class="active-ctrl-btn" id="ctrl-speaker">
+                <span class="ctrl-icon">🔊</span>
+                <span class="ctrl-label">Speaker</span>
+              </button>
+              <button class="active-ctrl-btn">
+                <span class="ctrl-icon">➕</span>
+                <span class="ctrl-label">Add call</span>
+              </button>
+              <button class="active-ctrl-btn">
+                <span class="ctrl-icon">⏸️</span>
+                <span class="ctrl-label">Hold</span>
+              </button>
+              <button class="active-ctrl-btn">
+                <span class="ctrl-icon">📹</span>
+                <span class="ctrl-label">Video</span>
+              </button>
+            </div>
+
+            <div class="end-call-center">
+              <button class="call-round-btn btn-decline" id="btn-end-active-call" aria-label="End Call">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="white">
+                  <path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08a.996.996 0 0 1 0-1.41C2.5 9.47 6.94 8 12 8s9.5 1.47 11.71 3.67c.39.39.39 1.02 0 1.41l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.11-.7-.28-.79-.74-1.69-1.36-2.67-1.85-.33-.16-.56-.5-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= MODAL: CONTACTS ================= -->
+        <div id="contacts-modal" class="modal-overlay hidden">
+          <div class="bottom-sheet">
+            <div class="sheet-handle"></div>
+            <div class="sheet-header">
+              <div>
+                <h3 class="sheet-title">Emergency Contacts</h3>
+                <p class="sheet-sub">Up to 3 people who get your location by SMS during SOS.</p>
+              </div>
+              <button class="sheet-close" id="btn-close-contacts">✕</button>
+            </div>
+
+            <div class="contacts-edit-list">
+              <!-- Contact 1 -->
+              <div class="contact-edit-card">
+                <div class="contact-card-title">
+                  <span class="badge-num">1</span>
+                  <span>Primary Contact (e.g. Maa)</span>
+                </div>
+                <input type="text" id="contact-name-0" class="input-field" placeholder="Contact Name" value="Maa">
+                <input type="tel" id="contact-phone-0" class="input-field" placeholder="Phone (+91 98765 43210)" value="+919876543210">
+              </div>
+
+              <!-- Contact 2 -->
+              <div class="contact-edit-card">
+                <div class="contact-card-title">
+                  <span class="badge-num">2</span>
+                  <span>Contact 2 (e.g. Papa)</span>
+                </div>
+                <input type="text" id="contact-name-1" class="input-field" placeholder="Contact Name" value="Papa">
+                <input type="tel" id="contact-phone-1" class="input-field" placeholder="Phone (+91 98765 43211)" value="+919876543211">
+              </div>
+
+              <!-- Contact 3 -->
+              <div class="contact-edit-card">
+                <div class="contact-card-title">
+                  <span class="badge-num">3</span>
+                  <span>Contact 3 (e.g. Priya)</span>
+                </div>
+                <input type="text" id="contact-name-2" class="input-field" placeholder="Contact Name" value="Priya">
+                <input type="tel" id="contact-phone-2" class="input-field" placeholder="Phone (+91 98765 43212)" value="+919876543212">
+              </div>
+            </div>
+
+            <button class="action-btn btn-sos width-full" id="btn-save-contacts">SAVE CONTACTS</button>
+            <p class="sheet-privacy-note">Stored locally on your device. Never shared or uploaded.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
